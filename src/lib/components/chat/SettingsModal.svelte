@@ -17,6 +17,7 @@
 	import Personalization from './Settings/Personalization.svelte';
 	import SearchInput from '../layout/Sidebar/SearchInput.svelte';
 	import Search from '../icons/Search.svelte';
+	import UserList from "$lib/components/chat/Settings/Users/UserList.svelte";
 
 	const i18n = getContext('i18n');
 
@@ -255,32 +256,36 @@
 			]
 		},
 		{
-			id: 'about',
-			title: 'About',
-			keywords: [
-				'about',
-				'info',
-				'information',
-				'version',
-				'documentation',
-				'help',
-				'support',
-				'details',
-				'aboutus',
-				'softwareinfo',
-				'timothyjaeryangbaek',
-				'openwebui',
-				'release',
-				'updates',
-				'updateinfo',
-				'versioninfo',
-				'aboutapp',
-				'terms',
-				'termsandconditions',
-				'contact',
-				'aboutpage'
-			]
+			id: 'manage',
+			title: 'Manage',
 		}
+		// {
+		// 	id: 'about',
+		// 	title: 'About',
+		// 	keywords: [
+		// 		'about',
+		// 		'info',
+		// 		'information',
+		// 		'version',
+		// 		'documentation',
+		// 		'help',
+		// 		'support',
+		// 		'details',
+		// 		'aboutus',
+		// 		'softwareinfo',
+		// 		'timothyjaeryangbaek',
+		// 		'openwebui',
+		// 		'release',
+		// 		'updates',
+		// 		'updateinfo',
+		// 		'versioninfo',
+		// 		'aboutapp',
+		// 		'terms',
+		// 		'termsandconditions',
+		// 		'contact',
+		// 		'aboutpage'
+		// 	]
+		// }
 	];
 
 	let search = '';
@@ -351,6 +356,7 @@
 	} else {
 		removeScrollListener();
 	}
+	console.log($user?.admin_groups, $user?.admin_groups );
 </script>
 
 <Modal size="xl" bind:show>
@@ -541,6 +547,28 @@
 								</div>
 								<div class=" self-center">{$i18n.t('Account')}</div>
 							</button>
+						{:else if tabId === 'manage' && $user?.permissions?.admin_groups.length > 0}
+							<button
+								class="px-0.5 py-1 min-w-fit rounded-lg flex-1 md:flex-none flex text-left transition {selectedTab ===
+								'manage'
+									? ''
+									: ' text-gray-300 dark:text-gray-600 hover:text-gray-700 dark:hover:text-white'}"
+								on:click={() => {
+									selectedTab = 'manage';
+								}}
+							>
+								<div class=" self-center mr-2">
+									<svg xmlns="http://www.w3.org/2000/svg"
+										 fill="currentColor"
+										 viewBox="0 0 24 24"
+										 class="w-4 h-4">
+  										<path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+									</svg>
+
+
+								</div>
+								<div class=" self-center">{$i18n.t('Manage')}</div>
+							</button>
 						{:else if tabId === 'about'}
 							<button
 								class="px-0.5 py-1 min-w-fit rounded-lg flex-1 md:flex-none flex text-left transition {selectedTab ===
@@ -604,7 +632,7 @@
 					</div>
 				{/if}
 			</div>
-			<div class="flex-1 md:min-h-[32rem] max-h-[32rem]">
+			<div class="flex-1 md:min-h-[32rem] max-h-[32rem] overflow-scroll w-full h-full">
 				{#if selectedTab === 'general'}
 					<General
 						{getModels}
@@ -638,6 +666,13 @@
 					<Chats {saveSettings} />
 				{:else if selectedTab === 'account'}
 					<Account
+						{saveSettings}
+						saveHandler={() => {
+							toast.success($i18n.t('Settings saved successfully!'));
+						}}
+					/>
+				{:else if selectedTab === 'manage' &&  $user?.permissions?.admin_groups.length > 0 }
+					<UserList
 						{saveSettings}
 						saveHandler={() => {
 							toast.success($i18n.t('Settings saved successfully!'));

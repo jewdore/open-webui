@@ -2,6 +2,7 @@ import asyncio
 import hashlib
 import json
 import logging
+import traceback
 from pathlib import Path
 from typing import Literal, Optional, overload
 
@@ -53,6 +54,7 @@ log.setLevel(SRC_LOG_LEVELS["OPENAI"])
 
 async def send_get_request(url, key=None):
     timeout = aiohttp.ClientTimeout(total=AIOHTTP_CLIENT_TIMEOUT_OPENAI_MODEL_LIST)
+    log.error(f"send_get_request: {url}, key: {key}, timeout: {timeout}")
     try:
         async with aiohttp.ClientSession(timeout=timeout, trust_env=True) as session:
             async with session.get(
@@ -61,6 +63,7 @@ async def send_get_request(url, key=None):
                 return await response.json()
     except Exception as e:
         # Handle connection error here
+        traceback.print_exc()
         log.error(f"Connection error: {e}")
         return None
 

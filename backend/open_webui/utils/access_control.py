@@ -59,13 +59,16 @@ def get_permissions(
     permissions = json.loads(json.dumps(default_permissions))
 
     # Combine permissions from all user groups
+    admin_ids = []
     for group in user_groups:
         group_permissions = group.permissions
         permissions = combine_permissions(permissions, group_permissions)
+        if user_id in group.admin_ids:
+            admin_ids.append(group.id)
 
     # Ensure all fields from default_permissions are present and filled in
     permissions = fill_missing_permissions(permissions, default_permissions)
-
+    permissions["admin_groups"] = admin_ids
     return permissions
 
 

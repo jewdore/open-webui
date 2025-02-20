@@ -440,6 +440,7 @@
 	"File not found.": "文件未找到。",
 	"File removed successfully.": "文件成功删除",
 	"File size should not exceed {{maxSize}} MB.": "文件大小不应超过 {{maxSize}} MB。",
+	"File count should not exceed {{maxCount}}.": "文件个数不应超过 {{maxCount}}。",
 	"File uploaded successfully": "文件上传成功。",
 	"Files": "文件",
 	"Filter is now globally disabled": "过滤器已全局禁用",

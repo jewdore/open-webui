@@ -69,7 +69,7 @@
 	};
 </script>
 
-<!-- {JSON.stringify(tokens)} -->
+<!--{Date.now()} {JSON.stringify(attributes)} {JSON.stringify(tokens)}-->
 {#each tokens as token, tokenIdx (tokenIdx)}
 	{#if token.type === 'hr'}
 		<hr class=" border-gray-50 dark:border-gray-850" />
@@ -167,7 +167,7 @@
 			</div>
 		</div>
 	{:else if token.type === 'blockquote'}
-		<blockquote>
+		<blockquote class="{attributes?.type==='reasoning' ? '!text-gray-500  !mb-3' : '' }">
 			<svelte:self id={`${id}-${tokenIdx}`} tokens={token.tokens} />
 		</blockquote>
 	{:else if token.type === 'list'}
@@ -197,7 +197,7 @@
 			</ul>
 		{/if}
 	{:else if token.type === 'details'}
-		<Collapsible title={token.summary} attributes={token?.attributes} className="w-full space-y-1">
+		<Collapsible title={token.summary} open={token?.attributes?.type==='reasoning'} attributes={token?.attributes} className="w-full space-y-1">
 			<div class=" mb-1.5" slot="content">
 				<svelte:self
 					id={`${id}-${tokenIdx}-d`}

@@ -3,9 +3,9 @@ import uuid
 import jwt
 
 from datetime import UTC, datetime, timedelta
-from typing import Optional, Union, List, Dict
+from typing import Optional, Union, List, Dict, Tuple
 
-from open_webui.models.users import Users
+from open_webui.models.users import Users, UserModel
 
 from open_webui.constants import ERROR_MESSAGES
 from open_webui.env import WEBUI_SECRET_KEY
@@ -14,8 +14,9 @@ from fastapi import Depends, HTTPException, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from passlib.context import CryptContext
 
-logging.getLogger("passlib").setLevel(logging.ERROR)
+from open_webui.models.groups import Groups, GroupModel
 
+logging.getLogger("passlib").setLevel(logging.ERROR)
 
 SESSION_SECRET = WEBUI_SECRET_KEY
 ALGORITHM = "HS256"
@@ -58,7 +59,7 @@ def decode_token(token: str) -> Optional[dict]:
 
 
 def extract_token_from_auth_header(auth_header: str):
-    return auth_header[len("Bearer ") :]
+    return auth_header[len("Bearer "):]
 
 
 def create_api_key():
@@ -75,8 +76,8 @@ def get_http_authorization_cred(auth_header: str):
 
 
 def get_current_user(
-    request: Request,
-    auth_token: HTTPAuthorizationCredentials = Depends(bearer_security),
+        request: Request,
+        auth_token: HTTPAuthorizationCredentials = Depends(bearer_security),
 ):
     token = None
 
@@ -167,3 +168,13 @@ def get_admin_user(user=Depends(get_current_user)):
             detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
         )
     return user
+
+
+def get_group_admin_user(user=Depends(get_current_user)) -> Tuple[UserModel, List[GroupModel]]:
+    groups = Groups.get_admin_groups_by_member_id(user.id)
+    if len(groups) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
+        )
+    return user, groups

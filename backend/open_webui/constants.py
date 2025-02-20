@@ -98,6 +98,10 @@ class ERROR_MESSAGES(str, Enum):
         lambda size="": f"Oops! The file you're trying to upload is too large. Please upload a file that is less than {size}."
     )
 
+    FILE_TOO_MANY = (
+        lambda count="": f"Oops! you've uploaded too many files. Please confirm that file num is less than {count}."
+    )
+
     DUPLICATE_CONTENT = (
         "Duplicate content detected. Please provide unique content to proceed."
     )

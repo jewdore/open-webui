@@ -18,6 +18,7 @@ from open_webui.models.auths import (
     UpdateProfileForm,
     UserResponse,
 )
+from open_webui.models.groups import Groups, GroupModel
 from open_webui.models.users import Users
 
 from open_webui.constants import ERROR_MESSAGES, WEBHOOK_MESSAGES
@@ -67,6 +68,7 @@ log.setLevel(SRC_LOG_LEVELS["MAIN"])
 class SessionUserResponse(Token, UserResponse):
     expires_at: Optional[int] = None
     permissions: Optional[dict] = None
+    admin_groups: Optional[list[dict]] = None
 
 
 @router.get("/", response_model=SessionUserResponse)

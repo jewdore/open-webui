@@ -3,6 +3,7 @@ import logging
 import mimetypes
 import os
 import shutil
+import time
 
 import uuid
 from datetime import datetime
@@ -763,7 +764,7 @@ def save_docs_to_vector_db(
                 )
                 return True
 
-        log.info(f"adding to collection {collection_name}")
+        log.info(f"{time.time()} adding to collection {collection_name}")
         embedding_function = get_embedding_function(
             request.app.state.config.RAG_EMBEDDING_ENGINE,
             request.app.state.config.RAG_EMBEDDING_MODEL,
@@ -794,12 +795,12 @@ def save_docs_to_vector_db(
             }
             for idx, text in enumerate(texts)
         ]
-
+        log.info(f"{time.time()} addingt to collection {collection_name}")
         VECTOR_DB_CLIENT.insert(
             collection_name=collection_name,
             items=items,
         )
-
+        log.info(f"{time.time()} addingd to collection {collection_name}")
         return True
     except Exception as e:
         log.exception(e)

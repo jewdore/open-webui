@@ -78,7 +78,7 @@ handle_peewee_migration(DATABASE_URL)
 SQLALCHEMY_DATABASE_URL = DATABASE_URL
 if "sqlite" in SQLALCHEMY_DATABASE_URL:
     engine = create_engine(
-        SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+        SQLALCHEMY_DATABASE_URL, echo=True, connect_args={"check_same_thread": False}
     )
 else:
     if DATABASE_POOL_SIZE > 0:

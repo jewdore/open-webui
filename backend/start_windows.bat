@@ -30,4 +30,8 @@ IF "%WEBUI_SECRET_KEY%%WEBUI_JWT_SECRET_KEY%" == " " (
 
 :: Execute uvicorn
 SET "WEBUI_SECRET_KEY=%WEBUI_SECRET_KEY%"
-uvicorn open_webui.main:app --host "%HOST%" --port "%PORT%" --forwarded-allow-ips '*'
+SET "CORS_ALLOW_ORIGIN=http://192.168.105.50:5173;http://localhost:5173"
+chcp 65001
+SET "WEBUI_NAME=融合平台"
+SET "DATABASE_URL=mysql://webui:webui@192.168.134.80:3307/webui"
+uvicorn open_webui.main:app --reload --host "%HOST%" --port "%PORT%" --forwarded-allow-ips '*'

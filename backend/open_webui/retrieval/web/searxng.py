@@ -49,12 +49,12 @@ def search_searxng(
         "q": query,
         "format": "json",
         "pageno": 1,
-        "safesearch": safesearch,
-        "language": language,
-        "time_range": time_range,
-        "categories": categories,
-        "theme": "simple",
-        "image_proxy": 0,
+        # "safesearch": safesearch,
+        # "language": language,
+        # "time_range": time_range,
+        # "categories": categories,
+        # "theme": "simple",
+        # "image_proxy": 0,
     }
 
     # Legacy query format

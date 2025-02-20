@@ -9,6 +9,7 @@
 	import UserCircleSolid from '$lib/components/icons/UserCircleSolid.svelte';
 	import XMark from '$lib/components/icons/XMark.svelte';
 	import Badge from '$lib/components/common/Badge.svelte';
+	import {user} from "$lib/stores";
 
 	export let onChange: Function = () => {};
 
@@ -17,10 +18,12 @@
 
 	let selectedGroupId = '';
 	let groups = [];
+	let adminGroups = []
 
 	onMount(async () => {
 		groups = await getGroups(localStorage.token);
-
+		adminGroups = groups.filter(group => group.admin_ids.includes($user.id));
+		// console.log(groups, adminGroups, $user, groups[0].admin_ids);
 		if (accessControl === null) {
 			accessControl = null;
 		} else {
@@ -36,6 +39,16 @@
 			};
 		}
 	});
+	accessControl = {
+				read: {
+					group_ids: accessControl?.read?.group_ids ?? [],
+					user_ids: accessControl?.read?.user_ids ?? []
+				},
+				write: {
+					group_ids: accessControl?.write?.group_ids ?? [],
+					user_ids: accessControl?.write?.user_ids ?? []
+				}
+			};
 
 	$: onChange(accessControl);
 
@@ -50,11 +63,12 @@
 			selectedGroupId = '';
 		}
 	};
+	let disable1 = $user.role !== 'admin' ? 'disabled': ''
 </script>
 
 <div class=" rounded-lg flex flex-col gap-2">
 	<div class="">
-		<div class=" text-sm font-semibold mb-1">{$i18n.t('Visibility')}</div>
+		<div class="{adminGroups.length === 0 ? 'hidden': ''} text-sm font-semibold mb-1">{$i18n.t('Visibility')}</div>
 
 		<div class="flex gap-2.5 items-center mb-1">
 			<div>
@@ -96,6 +110,7 @@
 			<div>
 				<select
 					id="models"
+					disabled="{disable1}"
 					class="outline-none bg-transparent text-sm font-medium rounded-lg block w-fit pr-10 max-w-full placeholder-gray-400"
 					value={accessControl !== null ? 'private' : 'public'}
 					on:change={(e) => {
@@ -128,10 +143,10 @@
 		</div>
 	</div>
 	{#if accessControl !== null}
-		{@const accessGroups = groups.filter((group) =>
+		{@const accessGroups = adminGroups.filter((group) =>
 			accessControl.read.group_ids.includes(group.id)
 		)}
-		<div>
+		<div class="{adminGroups.length === 0 ? 'hidden': ''}">
 			<div class="">
 				<div class="flex justify-between mb-1.5">
 					<div class="text-sm font-semibold">
@@ -152,7 +167,7 @@
 									<option class=" text-gray-700" value="" disabled selected
 										>{$i18n.t('Select a group')}</option
 									>
-									{#each groups.filter((group) => !accessControl.read.group_ids.includes(group.id)) as group}
+									{#each adminGroups.filter((group) => !accessControl.read.group_ids.includes(group.id)) as group}
 										<option class=" text-gray-700" value={group.id}>{group.name}</option>
 									{/each}
 								</select>
@@ -190,7 +205,7 @@
 
 								<div class="w-full flex justify-end items-center gap-0.5">
 									<button
-										class=""
+										class="hidden"
 										type="button"
 										on:click={() => {
 											if (accessRoles.includes('write')) {

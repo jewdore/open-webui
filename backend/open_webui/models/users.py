@@ -5,8 +5,7 @@ from open_webui.internal.db import Base, JSONField, get_db
 
 
 from open_webui.models.chats import Chats
-from open_webui.models.groups import Groups
-
+from open_webui.models.groups import Groups, GroupModel
 
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import BigInteger, Column, String, Text

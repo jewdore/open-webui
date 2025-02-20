@@ -1,21 +1,17 @@
-import json
 import logging
 import time
-from typing import Optional
 import uuid
-
-from open_webui.internal.db import Base, get_db
-from open_webui.env import SRC_LOG_LEVELS
-
-from open_webui.models.files import FileMetadataResponse
-
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import BigInteger, Column, String, Text, JSON, func
 
+from open_webui.env import SRC_LOG_LEVELS
+from open_webui.internal.db import Base, get_db
 
 log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["MODELS"])
+
 
 ####################
 # UserGroup DB Schema
@@ -36,6 +32,7 @@ class Group(Base):
 
     permissions = Column(JSON, nullable=True)
     user_ids = Column(JSON, nullable=True)
+    admin_ids = Column(JSON, nullable=True)
 
     created_at = Column(BigInteger)
     updated_at = Column(BigInteger)
@@ -54,6 +51,7 @@ class GroupModel(BaseModel):
 
     permissions: Optional[dict] = None
     user_ids: list[str] = []
+    admin_ids: list[str] = []
 
     created_at: int  # timestamp in epoch
     updated_at: int  # timestamp in epoch
@@ -73,6 +71,7 @@ class GroupResponse(BaseModel):
     data: Optional[dict] = None
     meta: Optional[dict] = None
     user_ids: list[str] = []
+    admin_ids: list[str] = []
     created_at: int  # timestamp in epoch
     updated_at: int  # timestamp in epoch
 
@@ -81,6 +80,7 @@ class GroupForm(BaseModel):
     name: str
     description: str
     permissions: Optional[dict] = None
+    meta: Optional[dict] = None
 
 
 class GroupUpdateForm(GroupForm):
@@ -89,7 +89,7 @@ class GroupUpdateForm(GroupForm):
 
 class GroupTable:
     def insert_new_group(
-        self, user_id: str, form_data: GroupForm
+            self, user_id: str, form_data: GroupForm
     ) -> Optional[GroupModel]:
         with get_db() as db:
             group = GroupModel(
@@ -137,6 +137,21 @@ class GroupTable:
                 .all()
             ]
 
+    def get_admin_groups_by_member_id(self, user_id: str) -> list[GroupModel]:
+        with get_db() as db:
+            return [
+                GroupModel.model_validate(group)
+                for group in db.query(Group)
+                .filter(
+                    func.json_array_length(Group.admin_ids) > 0
+                )  # Ensure array exists
+                .filter(
+                    Group.admin_ids.cast(String).like(f'%"{user_id}"%')
+                )  # String-based check
+                .order_by(Group.updated_at.desc())
+                .all()
+            ]
+
     def get_group_by_id(self, id: str) -> Optional[GroupModel]:
         try:
             with get_db() as db:
@@ -153,7 +168,7 @@ class GroupTable:
             return None
 
     def update_group_by_id(
-        self, id: str, form_data: GroupUpdateForm, overwrite: bool = False
+            self, id: str, form_data: GroupUpdateForm, overwrite: bool = False
     ) -> Optional[GroupModel]:
         try:
             with get_db() as db:
@@ -202,6 +217,23 @@ class GroupTable:
                         }
                     )
                     db.commit()
+
+                return True
+            except Exception:
+                return False
+
+    def add_user_to_group(self, group_id: str, user_id: str) -> bool:
+        with get_db() as db:
+            try:
+                group = self.get_group_by_id(group_id)
+                group.user_ids.append(user_id)
+                db.query(Group).filter_by(id=group.id).update(
+                    {
+                        "user_ids": group.user_ids,
+                        "updated_at": int(time.time()),
+                    }
+                )
+                db.commit()
 
                 return True
             except Exception:

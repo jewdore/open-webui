@@ -49,11 +49,6 @@
 			code_interpreter: true
 		}
 	};
-
-	export let meta = {
-		fileMaxSize: null,
-		fileMaxCount: null
-	}
 	export let userIds = [];
 
 	const submitHandler = async () => {
@@ -63,7 +58,6 @@
 			name,
 			description,
 			permissions,
-			meta,
 			user_ids: userIds
 		};
 
@@ -78,7 +72,7 @@
 			name = group.name;
 			description = group.description;
 			permissions = group?.permissions ?? {};
-			meta = group?.meta?? {};
+
 			userIds = group?.user_ids ?? [];
 		}
 	};
@@ -211,7 +205,7 @@
 							class="flex-1 mt-1 lg:mt-1 lg:h-[22rem] lg:max-h-[22rem] overflow-y-auto scrollbar-hidden"
 						>
 							{#if selectedTab == 'general'}
-								<Display bind:name bind:description bind:meta />
+								<Display bind:name bind:description />
 							{:else if selectedTab == 'permissions'}
 								<Permissions bind:permissions />
 							{:else if selectedTab == 'users'}

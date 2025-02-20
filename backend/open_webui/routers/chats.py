@@ -9,6 +9,7 @@ from open_webui.models.chats import (
     Chats,
     ChatTitleIdResponse,
 )
+from open_webui.models.groups import Groups
 from open_webui.models.tags import TagModel, Tags
 from open_webui.models.folders import Folders
 
@@ -294,6 +295,14 @@ async def get_shared_chat_by_id(share_id: str, user=Depends(get_verified_user)):
 
     if user.role == "user" or (user.role == "admin" and not ENABLE_ADMIN_CHAT_ACCESS):
         chat = Chats.get_chat_by_share_id(share_id)
+        if not chat:
+            group_chat = Chats.get_chat_by_id(share_id)
+            if group_chat:
+                groups = Groups.get_admin_groups_by_member_id(user.id)
+                if len(groups) > 0:
+                    group_users = Groups.get_group_user_ids_by_id(groups[0].id)
+                    if group_chat.user_id in group_users:
+                        chat = group_chat
     elif user.role == "admin" and ENABLE_ADMIN_CHAT_ACCESS:
         chat = Chats.get_chat_by_id(share_id)
 
@@ -488,6 +497,21 @@ async def clone_shared_chat_by_id(id: str, user=Depends(get_verified_user)):
         chat = Chats.insert_new_chat(user.id, ChatForm(**{"chat": updated_chat}))
         return ChatResponse(**chat.model_dump())
     else:
+        chat = Chats.get_chat_by_id(id)
+        if chat:
+            groups = Groups.get_admin_groups_by_member_id(user.id)
+            if len(groups) > 0:
+                group_users = Groups.get_group_user_ids_by_id(groups[0].id)
+                if chat.user_id in group_users:
+                    updated_chat = {
+                        **chat.chat,
+                        "originalChatId": chat.id,
+                        "branchPointMessageId": chat.chat["history"]["currentId"],
+                        "title": f"Clone of {chat.title}",
+                    }
+                    chat = Chats.insert_new_chat(user.id, ChatForm(**{"chat": updated_chat}))
+                    return ChatResponse(**chat.model_dump())
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail=ERROR_MESSAGES.DEFAULT()
         )

@@ -8,8 +8,6 @@
 	export let name = '';
 	export let color = '';
 	export let description = '';
-
-	export let meta = {};
 </script>
 
 <div class="flex gap-2">
@@ -59,55 +57,5 @@
 			bind:value={description}
 			placeholder={$i18n.t('Group Description')}
 		/>
-	</div>
-</div>
-
-<div class="flex flex-col w-full mt-2">
-	<div class=" mb-1 text-xs text-gray-500">{$i18n.t('Knowledge')}</div>
-	<div class="flex gap-1.5">
-		<div class=" self-center text-xs font-medium min-w-fit mb-1">
-			{$i18n.t('Max Upload Size')}
-		</div>
-
-		<div class="self-center">
-			<Tooltip
-				content={$i18n.t(
-					'The maximum file size in MB. If the file size exceeds this limit, the file will not be uploaded.'
-				)}
-				placement="top-start"
-			>
-				<input
-					class="w-full rounded-lg py-1.5 px-4 text-sm bg-gray-50 dark:text-gray-300 dark:bg-gray-850 outline-none"
-					type="number"
-					placeholder={$i18n.t('Leave empty for unlimited')}
-					bind:value={meta.fileMaxSize}
-					autocomplete="off"
-					min="0"
-				/>
-			</Tooltip>
-		</div>
-	</div>
-
-	<div class="flex gap-1.5">
-		<div class="self-center text-xs font-medium min-w-fit mb-1">
-			{$i18n.t('Max Upload Count')}
-		</div>
-		<div class="self-center">
-			<Tooltip
-				content={$i18n.t(
-					'The maximum number of files that can be used at once in chat. If the number of files exceeds this limit, the files will not be uploaded.'
-				)}
-				placement="top-start"
-			>
-				<input
-					class=" w-full rounded-lg py-1.5 px-4 text-sm bg-gray-50 dark:text-gray-300 dark:bg-gray-850 outline-none"
-					type="number"
-					placeholder={$i18n.t('Leave empty for unlimited')}
-					bind:value={meta.fileMaxCount}
-					autocomplete="off"
-					min="0"
-				/>
-			</Tooltip>
-		</div>
 	</div>
 </div>

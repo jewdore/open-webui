@@ -9,7 +9,7 @@
 
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { mobile, showSidebar, knowledge as _knowledge } from '$lib/stores';
+	import {mobile, showSidebar, knowledge as _knowledge, user, config} from '$lib/stores';
 
 	import { updateFileDataContentById, uploadFile, deleteFileById } from '$lib/apis/files';
 	import {
@@ -132,6 +132,39 @@
 		}
 
 		knowledge.files = [...(knowledge.files ?? []), fileItem];
+		if (
+				($config?.rag?.file_max_size ?? 0) >0 &&
+				file.size > $config?.rag?.file_max_size * 1024 * 1024
+			) {
+				console.log('File exceeds max size limit:', {
+					fileSize: file.size,
+					maxSize: $config?.rag?.file_max_size * 1024 * 1024
+				});
+				toast.error(
+					$i18n.t(`File size should not exceed {{maxSize}} MB.`, {
+						maxSize: $config?.rag?.file_max_size
+					})
+				);
+				knowledge.files.pop();
+				return;
+			}
+
+				if (
+				($config?.rag?.file_max_count ?? 0) >0 &&
+				knowledge?.files.length > $config?.rag?.file_max_count
+			) {
+				console.log('File exceeds max count limit:', {
+					fileSize: knowledge?.files.length,
+					maxSize: $config?.rag?.file_max_count * 1024 * 1024
+				});
+				toast.error(
+					$i18n.t(`File count should not exceed {{maxCount}}.`, {
+						maxCount: $config?.rag?.file_max_count
+					})
+				);
+				knowledge.files.pop();
+				return;
+			}
 
 		// Check if the file is an audio file and transcribe/convert it to text file
 		if (['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/x-m4a'].includes(file['type'])) {

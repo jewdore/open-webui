@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 import logging
 
+from open_webui.models.groups import Groups
 from open_webui.models.knowledge import (
     Knowledges,
     KnowledgeForm,
@@ -256,6 +257,9 @@ def add_file_to_knowledge_by_id(
     form_data: KnowledgeFileIdForm,
     user=Depends(get_verified_user),
 ):
+
+    group = Groups.get_groups_by_member_id(user.id)
+
     knowledge = Knowledges.get_knowledge_by_id(id=id)
 
     if not knowledge:
@@ -285,6 +289,28 @@ def add_file_to_knowledge_by_id(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=ERROR_MESSAGES.FILE_NOT_PROCESSED,
         )
+
+    if len(group) > 0:
+        fileMaxSize = group[0].meta.get("fileMaxSize", -1)
+        fileMaxCount = group[0].meta.get("fileMaxCount", -1)
+        fileSize = file.meta.get("size")
+        fileCount = 0
+        if knowledge.data:
+            fileCount = len(knowledge.data.get("file_ids", []))
+
+        if 0 < fileMaxSize*1024*1024 <= fileSize:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=ERROR_MESSAGES.FILE_TOO_LARGE(size=f"{fileMaxSize}M({fileSize}K)"),
+            )
+
+        if 0 < fileMaxCount <= fileCount:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=ERROR_MESSAGES.FILE_TOO_MANY(count=f"{fileMaxCount}({fileCount})"),
+            )
+
+
 
     # Add content to the vector database
     try:

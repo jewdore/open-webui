@@ -44,7 +44,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import Response, StreamingResponse
 
-
+from open_webui.models.groups import Groups
 from open_webui.socket.main import (
     app as socket_app,
     periodic_usage_pool_cleanup,
@@ -971,6 +971,8 @@ async def list_tasks_endpoint(user=Depends(get_verified_user)):
 @app.get("/api/config")
 async def get_app_config(request: Request):
     user = None
+    fileMaxSize = 0
+    fileMaxCount = 0
     if "token" in request.cookies:
         token = request.cookies.get("token")
         try:
@@ -983,6 +985,12 @@ async def get_app_config(request: Request):
             )
         if data is not None and "id" in data:
             user = Users.get_user_by_id(data["id"])
+            groups = Groups.get_groups_by_member_id(user.id)
+            if len(groups) > 0:
+                group = groups[0]
+                if group.meta:
+                    fileMaxSize = group.meta.get("fileMaxSize", 0)
+                    fileMaxCount = group.meta.get("fileMaxCount", 0)
 
     onboarding = False
     if user is None:
@@ -1047,6 +1055,10 @@ async def get_app_config(request: Request):
                     "client_id": GOOGLE_DRIVE_CLIENT_ID.value,
                     "api_key": GOOGLE_DRIVE_API_KEY.value,
                 },
+                "rag": {
+                    "file_max_size": fileMaxSize,
+                    "file_max_count": fileMaxCount,
+                }
             }
             if user is not None
             else {}
