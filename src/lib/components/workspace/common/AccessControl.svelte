@@ -39,16 +39,16 @@
 			};
 		}
 	});
-	accessControl = {
-				read: {
-					group_ids: accessControl?.read?.group_ids ?? [],
-					user_ids: accessControl?.read?.user_ids ?? []
-				},
-				write: {
-					group_ids: accessControl?.write?.group_ids ?? [],
-					user_ids: accessControl?.write?.user_ids ?? []
-				}
-			};
+	// accessControl = {
+	// 			read: {
+	// 				group_ids: accessControl?.read?.group_ids ?? [],
+	// 				user_ids: accessControl?.read?.user_ids ?? []
+	// 			},
+	// 			write: {
+	// 				group_ids: accessControl?.write?.group_ids ?? [],
+	// 				user_ids: accessControl?.write?.user_ids ?? []
+	// 			}
+	// 		};
 
 	$: onChange(accessControl);
 
@@ -146,7 +146,7 @@
 		{@const accessGroups = adminGroups.filter((group) =>
 			accessControl.read.group_ids.includes(group.id)
 		)}
-		<div class="{adminGroups.length === 0 ? 'hidden': ''}">
+		<div class="{$user.role !== 'admin' && adminGroups.length === 0 ? 'hidden': ''}">
 			<div class="">
 				<div class="flex justify-between mb-1.5">
 					<div class="text-sm font-semibold">
