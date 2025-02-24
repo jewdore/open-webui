@@ -1,3 +1,4 @@
+import contextvars
 import importlib.metadata
 import json
 import logging
@@ -64,6 +65,8 @@ except Exception:
 ####################################
 # LOGGING
 ####################################
+####################################
+LOGGING_DIR = os.environ.get("LOGGING_DIR", str(BASE_DIR / "logs"))
 
 log_levels = ["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"]
 
@@ -105,13 +108,80 @@ for source in log_sources:
 
 log.setLevel(SRC_LOG_LEVELS["CONFIG"])
 
-
 WEBUI_NAME = os.environ.get("WEBUI_NAME", "Open WebUI")
 # if WEBUI_NAME != "Open WebUI":
 #     WEBUI_NAME += " (Open WebUI)"
 
 WEBUI_FAVICON_URL = "https://openwebui.com/favicon.png"
 
+request_id_var = contextvars.ContextVar("request_id", default="unknown")
+
+
+class RequestIdFilter(logging.Filter):
+    def filter(self, record):
+        request_id = request_id_var.get()
+        if request_id:
+            record.request_id = request_id
+        else:
+            record.request_id = 'unset'  # 如果没有提供 request_id，则默认 'unknown'
+        return True
+
+
+LOGGING_CONFIG = {
+    'version': 1,
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+        },
+        'custom_formatter': {
+            'format': "%(asctime)s %(request_id)s [%(module)s:%(funcName)s(%(lineno)d)] %(name)s: %(message)s"
+        },
+    },
+    "filters": {
+        "request_id_filter": {
+            "()": RequestIdFilter,  # 引用自定义的 Filter
+        }
+    },
+    'handlers': {
+        'default': {
+            'formatter': 'standard',
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://sys.stdout',  # Default is stderr
+        },
+        'file_handler': {
+            "formatter": "custom_formatter",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": LOGGING_DIR + "/app.log",
+            "when": "d",
+            "interval": 1,
+            "backupCount": 7,
+            "filters": ['request_id_filter'],
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['file_handler'],
+            'level': 'DEBUG',
+        },
+        'uvicorn': {
+            'handlers': ['file_handler'],
+            'level': 'DEBUG',
+        },
+        'uvicorn.access': {
+            'handlers': ['file_handler'],
+            'level': 'DEBUG',
+        },
+        'uvicorn.error': {
+            'handlers': ['file_handler'],
+            'level': 'INFO',
+        },
+        'uvicorn.asgi': {
+            'handlers': ['file_handler'],
+            'level': 'DEBUG',
+        },
+
+    },
+}
 
 ####################################
 # ENV (dev,test,prod)
@@ -128,7 +198,6 @@ else:
         PACKAGE_DATA = json.loads((BASE_DIR / "package.json").read_text())
     except Exception:
         PACKAGE_DATA = {"version": "0.0.0"}
-
 
 VERSION = PACKAGE_DATA["version"]
 
@@ -160,7 +229,6 @@ try:
 except Exception:
     changelog_content = (pkgutil.get_data("open_webui", "CHANGELOG.md") or b"").decode()
 
-
 # Convert markdown content to HTML
 html_content = markdown.markdown(changelog_content)
 
@@ -191,7 +259,6 @@ for version in soup.find_all("h2"):
 
     changelog_json[version_number] = version_data
 
-
 CHANGELOG = changelog_json
 
 ####################################
@@ -205,9 +272,8 @@ SAFE_MODE = os.environ.get("SAFE_MODE", "false").lower() == "true"
 ####################################
 
 ENABLE_FORWARD_USER_INFO_HEADERS = (
-    os.environ.get("ENABLE_FORWARD_USER_INFO_HEADERS", "False").lower() == "true"
+        os.environ.get("ENABLE_FORWARD_USER_INFO_HEADERS", "False").lower() == "true"
 )
-
 
 ####################################
 # WEBUI_BUILD_HASH
@@ -243,7 +309,6 @@ if FROM_INIT_PY:
 
     DATA_DIR = Path(os.getenv("DATA_DIR", OPEN_WEBUI_DIR / "data"))
 
-
 STATIC_DIR = Path(os.getenv("STATIC_DIR", OPEN_WEBUI_DIR / "static"))
 
 FONTS_DIR = Path(os.getenv("FONTS_DIR", OPEN_WEBUI_DIR / "static" / "fonts"))
@@ -254,7 +319,6 @@ if FROM_INIT_PY:
     FRONTEND_BUILD_DIR = Path(
         os.getenv("FRONTEND_BUILD_DIR", OPEN_WEBUI_DIR / "frontend")
     ).resolve()
-
 
 ####################################
 # Database
@@ -317,12 +381,11 @@ else:
         DATABASE_POOL_RECYCLE = 3600
 
 RESET_CONFIG_ON_START = (
-    os.environ.get("RESET_CONFIG_ON_START", "False").lower() == "true"
+        os.environ.get("RESET_CONFIG_ON_START", "False").lower() == "true"
 )
 
-
 ENABLE_REALTIME_CHAT_SAVE = (
-    os.environ.get("ENABLE_REALTIME_CHAT_SAVE", "False").lower() == "true"
+        os.environ.get("ENABLE_REALTIME_CHAT_SAVE", "False").lower() == "true"
 )
 
 ####################################
@@ -342,7 +405,7 @@ WEBUI_AUTH_TRUSTED_EMAIL_HEADER = os.environ.get(
 WEBUI_AUTH_TRUSTED_NAME_HEADER = os.environ.get("WEBUI_AUTH_TRUSTED_NAME_HEADER", None)
 
 BYPASS_MODEL_ACCESS_CONTROL = (
-    os.environ.get("BYPASS_MODEL_ACCESS_CONTROL", "False").lower() == "true"
+        os.environ.get("BYPASS_MODEL_ACCESS_CONTROL", "False").lower() == "true"
 )
 
 ####################################
@@ -359,7 +422,7 @@ WEBUI_SECRET_KEY = os.environ.get(
 WEBUI_SESSION_COOKIE_SAME_SITE = os.environ.get("WEBUI_SESSION_COOKIE_SAME_SITE", "lax")
 
 WEBUI_SESSION_COOKIE_SECURE = (
-    os.environ.get("WEBUI_SESSION_COOKIE_SECURE", "false").lower() == "true"
+        os.environ.get("WEBUI_SESSION_COOKIE_SECURE", "false").lower() == "true"
 )
 
 WEBUI_AUTH_COOKIE_SAME_SITE = os.environ.get(
@@ -367,18 +430,18 @@ WEBUI_AUTH_COOKIE_SAME_SITE = os.environ.get(
 )
 
 WEBUI_AUTH_COOKIE_SECURE = (
-    os.environ.get(
-        "WEBUI_AUTH_COOKIE_SECURE",
-        os.environ.get("WEBUI_SESSION_COOKIE_SECURE", "false"),
-    ).lower()
-    == "true"
+        os.environ.get(
+            "WEBUI_AUTH_COOKIE_SECURE",
+            os.environ.get("WEBUI_SESSION_COOKIE_SECURE", "false"),
+        ).lower()
+        == "true"
 )
 
 if WEBUI_AUTH and WEBUI_SECRET_KEY == "":
     raise ValueError(ERROR_MESSAGES.ENV_VAR_NOT_FOUND)
 
 ENABLE_WEBSOCKET_SUPPORT = (
-    os.environ.get("ENABLE_WEBSOCKET_SUPPORT", "True").lower() == "true"
+        os.environ.get("ENABLE_WEBSOCKET_SUPPORT", "True").lower() == "true"
 )
 
 WEBSOCKET_MANAGER = os.environ.get("WEBSOCKET_MANAGER", "")

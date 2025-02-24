@@ -1,9 +1,11 @@
 import asyncio
+import contextvars
 import inspect
 import json
 import logging
 import mimetypes
 import os
+import platform
 import shutil
 import sys
 import time
@@ -11,6 +13,8 @@ import random
 
 from contextlib import asynccontextmanager
 from urllib.parse import urlencode, parse_qs, urlparse
+from uuid import uuid4
+
 from pydantic import BaseModel
 from sqlalchemy import text
 
@@ -19,10 +23,11 @@ from aiocache import cached
 import aiohttp
 import requests
 
-__import__('pysqlite3')
-import sys
+if platform.system() != 'Windows':
+    __import__('pysqlite3')
+    import sys
 
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 from fastapi import (
     Depends,
@@ -284,7 +289,7 @@ from open_webui.env import (
     ENABLE_WEBSOCKET_SUPPORT,
     BYPASS_MODEL_ACCESS_CONTROL,
     RESET_CONFIG_ON_START,
-    OFFLINE_MODE,
+    OFFLINE_MODE, LOGGING_CONFIG, request_id_var,
 )
 
 from open_webui.utils.models import (
@@ -315,6 +320,9 @@ if SAFE_MODE:
     Functions.deactivate_all_functions()
 
 logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
+logging.config.dictConfig(
+    LOGGING_CONFIG
+)
 log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["MAIN"])
 
@@ -719,6 +727,17 @@ async def inspect_websocket(request: Request, call_next):
                 content={"detail": "Invalid WebSocket upgrade request"},
             )
     return await call_next(request)
+
+
+@app.middleware("http")
+async def dispatch(request: Request, call_next):
+    request_id = str(uuid4())  # 生成请求 ID
+    request_id_var.set(request_id)
+
+    response = await call_next(request)
+
+    response.headers['X-Request-ID'] = request_id  # 将请求 ID 添加到响应头
+    return response
 
 
 app.add_middleware(
