@@ -15,87 +15,6 @@ from contextlib import asynccontextmanager
 from urllib.parse import urlencode, parse_qs, urlparse
 from uuid import uuid4
 
-from pydantic import BaseModel
-from sqlalchemy import text
-
-from typing import Optional
-from aiocache import cached
-import aiohttp
-import requests
-
-if platform.system() != 'Windows':
-    __import__('pysqlite3')
-    import sys
-
-    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-
-from fastapi import (
-    Depends,
-    FastAPI,
-    File,
-    Form,
-    HTTPException,
-    Request,
-    UploadFile,
-    status,
-    applications,
-    BackgroundTasks,
-)
-
-from fastapi.openapi.docs import get_swagger_ui_html
-
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
-
-from starlette.exceptions import HTTPException as StarletteHTTPException
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.middleware.sessions import SessionMiddleware
-from starlette.responses import Response, StreamingResponse
-
-from open_webui.models.groups import Groups
-from open_webui.socket.main import (
-    app as socket_app,
-    periodic_usage_pool_cleanup,
-)
-from open_webui.routers import (
-    audio,
-    images,
-    ollama,
-    openai,
-    retrieval,
-    pipelines,
-    tasks,
-    auths,
-    channels,
-    chats,
-    folders,
-    configs,
-    groups,
-    files,
-    functions,
-    memories,
-    models,
-    knowledge,
-    prompts,
-    evaluations,
-    tools,
-    users,
-    utils,
-)
-
-from open_webui.routers.retrieval import (
-    get_embedding_function,
-    get_ef,
-    get_rf,
-)
-
-from open_webui.internal.db import Session
-
-from open_webui.models.functions import Functions
-from open_webui.models.models import Models
-from open_webui.models.users import UserModel, Users
-
 from open_webui.config import (
     # Ollama
     ENABLE_OLLAMA_API,
@@ -289,8 +208,91 @@ from open_webui.env import (
     ENABLE_WEBSOCKET_SUPPORT,
     BYPASS_MODEL_ACCESS_CONTROL,
     RESET_CONFIG_ON_START,
-    OFFLINE_MODE, LOGGING_CONFIG, request_id_var,
+    OFFLINE_MODE, request_id_var,
 )
+
+from pydantic import BaseModel
+from sqlalchemy import text
+
+from typing import Optional
+from aiocache import cached
+import aiohttp
+import requests
+
+if platform.system() != 'Windows':
+    __import__('pysqlite3')
+    import sys
+
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
+from fastapi import (
+    Depends,
+    FastAPI,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    UploadFile,
+    status,
+    applications,
+    BackgroundTasks,
+)
+
+from fastapi.openapi.docs import get_swagger_ui_html
+
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.sessions import SessionMiddleware
+from starlette.responses import Response, StreamingResponse
+
+from open_webui.models.groups import Groups
+from open_webui.socket.main import (
+    app as socket_app,
+    periodic_usage_pool_cleanup,
+)
+from open_webui.routers import (
+    audio,
+    images,
+    ollama,
+    openai,
+    retrieval,
+    pipelines,
+    tasks,
+    auths,
+    channels,
+    chats,
+    folders,
+    configs,
+    groups,
+    files,
+    functions,
+    memories,
+    models,
+    knowledge,
+    prompts,
+    evaluations,
+    tools,
+    users,
+    utils,
+)
+
+from open_webui.routers.retrieval import (
+    get_embedding_function,
+    get_ef,
+    get_rf,
+)
+
+from open_webui.internal.db import Session
+
+from open_webui.models.functions import Functions
+from open_webui.models.models import Models
+from open_webui.models.users import UserModel, Users
+
+
 
 from open_webui.utils.models import (
     get_all_models,
@@ -319,10 +321,8 @@ if SAFE_MODE:
     print("SAFE MODE ENABLED")
     Functions.deactivate_all_functions()
 
-logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
-logging.config.dictConfig(
-    LOGGING_CONFIG
-)
+# logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
+
 log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["MAIN"])
 

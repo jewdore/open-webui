@@ -22,7 +22,7 @@ from open_webui.env import (
 )
 
 
-logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
+# logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
 log = logging.getLogger(__name__)
 log.setLevel(SRC_LOG_LEVELS["SOCKET"])
 
@@ -48,7 +48,7 @@ else:
 
 
 # Timeout duration in seconds
-TIMEOUT_DURATION = 3
+TIMEOUT_DURATION = 30
 
 # Dictionary to maintain the user pool
 

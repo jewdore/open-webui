@@ -1,3 +1,4 @@
+import json
 from logging.config import fileConfig
 
 from alembic import context
@@ -11,7 +12,7 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-if config.config_file_name is not None:
+if config.config_file_name is not None and False:
     fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 # add your model's MetaData object here

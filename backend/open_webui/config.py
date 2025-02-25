@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import shutil
+import traceback
 from datetime import datetime
 from pathlib import Path
 from typing import Generic, Optional, TypeVar
@@ -55,6 +56,7 @@ def run_migrations():
 
         command.upgrade(alembic_cfg, "head")
     except Exception as e:
+        traceback.print_exc()
         print(f"Error: {e}")
 
 
@@ -689,7 +691,7 @@ Path(CACHE_DIR).mkdir(parents=True, exist_ok=True)
 ENABLE_OLLAMA_API = PersistentConfig(
     "ENABLE_OLLAMA_API",
     "ollama.enable",
-    os.environ.get("ENABLE_OLLAMA_API", "True").lower() == "true",
+    os.environ.get("ENABLE_OLLAMA_API", "False").lower() == "true",
 )
 
 OLLAMA_API_BASE_URL = os.environ.get(

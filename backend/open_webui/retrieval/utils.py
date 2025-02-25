@@ -397,7 +397,7 @@ def get_model_path(model: str, update_model: bool = False):
 
     if OFFLINE_MODE:
         local_files_only = True
-
+    local_files_only = True
     snapshot_kwargs = {
         "cache_dir": cache_dir,
         "local_files_only": local_files_only,

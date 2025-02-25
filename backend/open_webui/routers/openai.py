@@ -649,7 +649,7 @@ async def generate_chat_completion(
         session = aiohttp.ClientSession(
             trust_env=True, timeout=aiohttp.ClientTimeout(total=AIOHTTP_CLIENT_TIMEOUT)
         )
-
+        log.debug(f"openai-start: {url}/chat/completions, payload: {payload}")
         r = await session.request(
             method="POST",
             url=f"{url}/chat/completions",
@@ -677,7 +677,7 @@ async def generate_chat_completion(
                 ),
             },
         )
-
+        log.debug(f"openai-end: {r.content} {'text/event-stream' in r.headers.get('Content-Type', '')}")
         # Check if response is SSE
         if "text/event-stream" in r.headers.get("Content-Type", ""):
             streaming = True

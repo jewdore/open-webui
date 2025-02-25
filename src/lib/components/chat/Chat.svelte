@@ -1380,7 +1380,7 @@
 		_history = JSON.parse(JSON.stringify(history));
 		// Save chat after all messages have been created
 		await saveChatHandler(_chatId, _history);
-
+		console.log('selectedModelIds', selectedModelIds)
 		await Promise.all(
 			selectedModelIds.map(async (modelId, _modelIdx) => {
 				console.log('modelId', modelId);

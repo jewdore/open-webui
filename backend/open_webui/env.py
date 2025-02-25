@@ -72,9 +72,116 @@ log_levels = ["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"]
 
 GLOBAL_LOG_LEVEL = os.environ.get("GLOBAL_LOG_LEVEL", "").upper()
 if GLOBAL_LOG_LEVEL in log_levels:
-    logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL, force=True)
+    pass
+    # logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL, force=True)
 else:
     GLOBAL_LOG_LEVEL = "INFO"
+
+request_id_var = contextvars.ContextVar("request_id", default="unknown")
+
+
+class RequestIdFilter(logging.Filter):
+    def filter(self, record):
+        request_id = request_id_var.get()
+        if request_id:
+            record.request_id = request_id
+        else:
+            record.request_id = 'unset'  # 如果没有提供 request_id，则默认 'unknown'
+        return True
+
+
+LOGGING_CONFIG = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s '
+        },
+        'custom_formatter': {
+            'format': "%(asctime)s %(request_id)s [%(module)s:%(funcName)s(%(lineno)d)] %(name)s: %(message)s"
+        },
+    },
+    "filters": {
+        "request_id_filter": {
+            "()": RequestIdFilter,  # 引用自定义的 Filter
+        }
+    },
+    'handlers': {
+        'default': {
+            'formatter': 'standard',
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://sys.stdout',  # Default is stderr
+        },
+        'file_handler': {
+            "formatter": "custom_formatter",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": LOGGING_DIR + "/app.log",
+            "when": "d",
+            "interval": 1,
+            "backupCount": 7,
+            "filters": ['request_id_filter'],
+        },
+        'file_handler_sql': {
+            "formatter": "custom_formatter",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": LOGGING_DIR + "/sql.log",
+            "when": "d",
+            "interval": 1,
+            "backupCount": 7,
+            "filters": ['request_id_filter'],
+        },
+        'file_handler_unicorn': {
+            "formatter": "custom_formatter",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": LOGGING_DIR + "/unicorn.log",
+            "when": "d",
+            "interval": 1,
+            "backupCount": 7,
+            "filters": ['request_id_filter'],
+        },
+    },
+    'loggers': {
+        'root': {
+            'handlers': ['file_handler'],
+            'level': 'DEBUG',
+        },
+        'sqlalchemy': {
+            'handlers': ['file_handler_sql'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'sqlalchemy.engine.Engine': {
+            'handlers': ['file_handler_sql'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'uvicorn': {
+            'handlers': ['file_handler_unicorn'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'uvicorn.access': {
+            'handlers': ['file_handler'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'uvicorn.error': {
+            'handlers': ['file_handler_unicorn'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'uvicorn.asgi': {
+            'handlers': ['file_handler_unicorn'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+
+    },
+}
+
+logging.config.dictConfig(
+    LOGGING_CONFIG
+)
 
 log = logging.getLogger(__name__)
 log.info(f"GLOBAL_LOG_LEVEL: {GLOBAL_LOG_LEVEL}")
@@ -114,74 +221,10 @@ WEBUI_NAME = os.environ.get("WEBUI_NAME", "Open WebUI")
 
 WEBUI_FAVICON_URL = "https://openwebui.com/favicon.png"
 
-request_id_var = contextvars.ContextVar("request_id", default="unknown")
 
 
-class RequestIdFilter(logging.Filter):
-    def filter(self, record):
-        request_id = request_id_var.get()
-        if request_id:
-            record.request_id = request_id
-        else:
-            record.request_id = 'unset'  # 如果没有提供 request_id，则默认 'unknown'
-        return True
 
 
-LOGGING_CONFIG = {
-    'version': 1,
-    'formatters': {
-        'standard': {
-            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
-        },
-        'custom_formatter': {
-            'format': "%(asctime)s %(request_id)s [%(module)s:%(funcName)s(%(lineno)d)] %(name)s: %(message)s"
-        },
-    },
-    "filters": {
-        "request_id_filter": {
-            "()": RequestIdFilter,  # 引用自定义的 Filter
-        }
-    },
-    'handlers': {
-        'default': {
-            'formatter': 'standard',
-            'class': 'logging.StreamHandler',
-            'stream': 'ext://sys.stdout',  # Default is stderr
-        },
-        'file_handler': {
-            "formatter": "custom_formatter",
-            "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": LOGGING_DIR + "/app.log",
-            "when": "d",
-            "interval": 1,
-            "backupCount": 7,
-            "filters": ['request_id_filter'],
-        },
-    },
-    'loggers': {
-        '': {
-            'handlers': ['file_handler'],
-            'level': 'DEBUG',
-        },
-        'uvicorn': {
-            'handlers': ['file_handler'],
-            'level': 'DEBUG',
-        },
-        'uvicorn.access': {
-            'handlers': ['file_handler'],
-            'level': 'DEBUG',
-        },
-        'uvicorn.error': {
-            'handlers': ['file_handler'],
-            'level': 'INFO',
-        },
-        'uvicorn.asgi': {
-            'handlers': ['file_handler'],
-            'level': 'DEBUG',
-        },
-
-    },
-}
 
 ####################################
 # ENV (dev,test,prod)
