@@ -1035,6 +1035,7 @@ async def process_chat_response(
         event_emitter = get_event_emitter(metadata)
         event_caller = get_event_call(metadata)
 
+    log.debug(f"{event_emitter=} {event_caller=} {metadata=}")
     # Non-streaming response
     if not isinstance(response, StreamingResponse):
         if event_emitter:
@@ -1408,7 +1409,7 @@ async def process_chat_response(
                     async for line in response.body_iterator:
                         line = line.decode("utf-8") if isinstance(line, bytes) else line
                         data = line
-
+                        log.debug(f"streaming {data=}")
                         # Skip empty lines
                         if not data.strip():
                             continue

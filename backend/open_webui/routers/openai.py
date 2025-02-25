@@ -677,7 +677,7 @@ async def generate_chat_completion(
                 ),
             },
         )
-        log.debug(f"openai-end: {r.content} {'text/event-stream' in r.headers.get('Content-Type', '')}")
+        log.debug(f"openai-end: {r.content} {'text/event-stream' in r.headers.get('Content-Type', '')}({r.headers.get('X-Aaaapi-Request-Id', '')})")
         # Check if response is SSE
         if "text/event-stream" in r.headers.get("Content-Type", ""):
             streaming = True
