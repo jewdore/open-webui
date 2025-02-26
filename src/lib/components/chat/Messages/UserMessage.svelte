@@ -219,7 +219,8 @@
 								: ' w-full'}"
 						>
 							{#if message.content}
-								<Markdown id={message.id} content={message.content} />
+<!--								<Markdown id={message.id} content={message.content} />-->
+								{message.content}
 							{/if}
 						</div>
 					</div>

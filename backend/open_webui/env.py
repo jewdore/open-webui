@@ -98,7 +98,7 @@ LOGGING_CONFIG = {
             'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s '
         },
         'custom_formatter': {
-            'format': "%(asctime)s %(request_id)s [%(module)s:%(funcName)s(%(lineno)d)] %(name)s: %(message)s"
+            'format': "%(asctime)s %(request_id)s-(%(process)s:%(thread)s) [%(module)s:%(funcName)s(%(lineno)d)] %(name)s: %(message)s"
         },
     },
     "filters": {

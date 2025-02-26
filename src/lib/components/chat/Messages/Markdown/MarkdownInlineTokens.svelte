@@ -64,9 +64,10 @@
 	{:else if token.type === 'br'}
 		<br />
 	{:else if token.type === 'del'}
-		<del>
-			<svelte:self id={`${id}-del`} tokens={token.tokens} {onSourceClick} />
-		</del>
+<!--		<del class="{JSON.stringify(token)}">-->
+<!--			<svelte:self id={`${id}-del`} tokens={token.tokens} {onSourceClick} />-->
+<!--		</del>-->
+		{token.raw}
 	{:else if token.type === 'inlineKatex'}
 		{#if token.text}
 			<KatexRenderer content={token.text} displayMode={false} />

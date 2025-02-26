@@ -1409,7 +1409,7 @@ async def process_chat_response(
                     async for line in response.body_iterator:
                         line = line.decode("utf-8") if isinstance(line, bytes) else line
                         data = line
-                        log.debug(f"streaming {data=}")
+
                         # Skip empty lines
                         if not data.strip():
                             continue
@@ -1570,7 +1570,7 @@ async def process_chat_response(
                         await response.background()
 
                 await stream_body_handler(response)
-
+                log.debug(f"finished streaming {task_id=} {content=} {content_blocks=}")
                 MAX_TOOL_CALL_RETRIES = 5
                 tool_call_retries = 0
 

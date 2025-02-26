@@ -15,6 +15,12 @@ from contextlib import asynccontextmanager
 from urllib.parse import urlencode, parse_qs, urlparse
 from uuid import uuid4
 
+if platform.system() != 'Windows':
+    __import__('pysqlite3')
+    import sys
+
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 from open_webui.config import (
     # Ollama
     ENABLE_OLLAMA_API,
@@ -219,11 +225,7 @@ from aiocache import cached
 import aiohttp
 import requests
 
-if platform.system() != 'Windows':
-    __import__('pysqlite3')
-    import sys
 
-    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 from fastapi import (
     Depends,

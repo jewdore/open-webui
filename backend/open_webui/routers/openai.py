@@ -354,7 +354,7 @@ async def get_filtered_models(models, user):
     return filtered_models
 
 
-@cached(ttl=3)
+@cached(ttl=30)
 async def get_all_models(request: Request) -> dict[str, list]:
     log.info("get_all_models()")
 
