@@ -1,3 +1,5 @@
+import copy
+import json
 import logging
 from typing import Optional
 
@@ -135,13 +137,45 @@ async def update_user_role(form_data: UserRoleUpdateForm, user=Depends(get_admin
 @router.get("/user/settings", response_model=Optional[UserSettings])
 async def get_user_settings_by_session_user(user=Depends(get_verified_user)):
     user = Users.get_user_by_id(user.id)
+    default_settings = {
+                "ui": {
+                    "landingPageMode": 'chat',
+                    "title": {
+                        "auto": False,
+                    },
+                    "autoTags": False,
+                    "showUpdateToast": False,
+                    "richTextInput": False,
+                }
+            }
     if user:
+        if user.settings is None:
+            return default_settings
+
+        if user.settings.ui is None:
+            user.settings.ui = default_settings['ui']
+            return user.settings
+
+        user.settings.ui = merge_dicts(source=default_settings['ui'], target=user.settings.ui)
         return user.settings
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=ERROR_MESSAGES.USER_NOT_FOUND,
         )
+
+
+def merge_dicts(source, target):
+    for key, value in source.items():
+        if isinstance(value, dict) and key in target:
+            # 如果目标字典也包含这个键，并且对应值是一个字典，
+            # 使用递归调用合并它们
+            merge_dicts(value, target[key])
+        else:
+            # 否则，直接覆盖或添加
+            target[key] = value
+    return target
+
 
 
 ############################

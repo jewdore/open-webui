@@ -58,7 +58,15 @@ export const functions = writable(null);
 
 export const banners: Writable<Banner[]> = writable([]);
 
-export const settings: Writable<Settings> = writable({});
+const defaultSettings: Partial<Settings> = {
+    landingPageMode: 'chat',
+    title: {
+        auto: false,
+    },
+    autoTags: false,
+    showUpdateToast: false,
+};
+export const settings: Writable<Settings> = writable(defaultSettings);
 
 export const showSidebar = writable(false);
 export const showSettings = writable(false);
@@ -138,6 +146,10 @@ type Settings = {
 	title?: TitleSettings;
 	splitLargeDeltas?: boolean;
 	chatDirection: 'LTR' | 'RTL';
+
+    landingPageMode?: string,
+    autoTags?: boolean
+    showUpdateToast?: boolean;
 
 	system?: string;
 	requestFormat?: string;

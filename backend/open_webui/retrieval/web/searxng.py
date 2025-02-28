@@ -41,7 +41,7 @@ def search_searxng(
 
     # Default values for optional parameters are provided as empty strings or None when not specified.
     language = kwargs.get("language", "en-US")
-    safesearch = kwargs.get("safesearch", "1")
+    safesearch = kwargs.get("safesearch", "0")
     time_range = kwargs.get("time_range", "")
     categories = "".join(kwargs.get("categories", []))
 
@@ -49,21 +49,23 @@ def search_searxng(
         "q": query,
         "format": "json",
         "pageno": 1,
-        # "safesearch": safesearch,
-        # "language": language,
+        "safesearch": safesearch,
+        "max_redirects": 3,
+        "allow_redirects": 1,
+        "language": language,
         # "time_range": time_range,
         # "categories": categories,
         # "theme": "simple",
         # "image_proxy": 0,
     }
-
+    # query_url += "?disabled_engines=&enabled_engines=bing__general"
     # Legacy query format
     if "<query>" in query_url:
         # Strip all query parameters from the URL
         query_url = query_url.split("?")[0]
 
-    log.debug(f"searching {query_url}")
-
+    query_urltest = query_url + "?" + "&".join([f"{k}={v}" for k, v in params.items()])
+    log.debug(f"searching searxng {query_urltest} {params}")
     response = requests.get(
         query_url,
         headers={
@@ -80,6 +82,7 @@ def search_searxng(
 
     json_response = response.json()
     results = json_response.get("results", [])
+    log.debug(f"searching searxng response({count}) length {len(results)} ")
     sorted_results = sorted(results, key=lambda x: x.get("score", 0), reverse=True)
     if filter_list:
         sorted_results = get_filtered_results(sorted_results, filter_list)

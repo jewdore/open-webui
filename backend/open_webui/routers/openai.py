@@ -337,7 +337,7 @@ async def get_all_models_responses(request: Request) -> list:
                 ):
                     model["id"] = f"{prefix_id}.{model['id']}"
 
-    log.debug(f"get_all_models:responses() {responses}")
+    log.debug(f"get_all_models:responses() {len(responses)}")
     return responses
 
 
@@ -405,7 +405,7 @@ async def get_all_models(request: Request) -> dict[str, list]:
         return merged_list
 
     models = {"data": merge_models_lists(map(extract_data, responses))}
-    log.debug(f"models: {models}")
+    log.debug(f"models: {len(models)}")
 
     request.app.state.OPENAI_MODELS = {model["id"]: model for model in models["data"]}
     return models

@@ -1,7 +1,10 @@
+import asyncio
 import socket
+import traceback
 import urllib.parse
 import validators
-from typing import Union, Sequence, Iterator
+import aiohttp
+from typing import Union, Sequence, Iterator, Dict
 
 from langchain_community.document_loaders import (
     WebBaseLoader,
@@ -49,7 +52,8 @@ def safe_validate_urls(url: Sequence[str]) -> Sequence[str]:
         try:
             if validate_url(u):
                 valid_urls.append(u)
-        except ValueError:
+        except Exception as e:
+            traceback.print_exc()
             continue
     return valid_urls
 
@@ -90,6 +94,59 @@ class SafeWebBaseLoader(WebBaseLoader):
             except Exception as e:
                 # Log the error and continue with the next URL
                 log.error(f"Error loading {path}: {e}")
+
+    async def _fetch(
+            self, url: str, retries: int = 1, cooldown: int = 2, backoff: float = 1.5
+    ) -> str:
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=8)) as session:
+            for i in range(retries):
+                try:
+                    kwargs: Dict = dict(
+                        headers=self.session.headers,
+                        cookies=self.session.cookies.get_dict(),
+                    )
+                    if not self.session.verify:
+                        kwargs["ssl"] = False
+                    async with session.get(url, **kwargs) as response:
+                        if self.raise_for_status:
+                            response.raise_for_status()
+                        return await response.text()
+                except aiohttp.ClientConnectionError as e:
+                    if i == retries - 1:
+                        raise
+                    else:
+                        log.warning(
+                            f"Error fetching {url} with attempt "
+                            f"{i + 1}/{retries}: {e}. Retrying..."
+                        )
+                        await asyncio.sleep(cooldown * backoff ** i)
+        raise ValueError("retry count exceeded")
+
+    def aload(self) -> list[Document]:  # type: ignore
+        """Load text from the urls in web_path async into Documents."""
+        docs = []
+        try:
+            results = self.scrape_all(self.web_paths)
+
+            for path, soup in zip(self.web_paths, results):
+                text = soup.get_text(**self.bs_get_text_kwargs)
+                metadata = {"source": path}
+                if title := soup.find("title"):
+                    metadata["title"] = title.get_text()
+                if description := soup.find("meta", attrs={"name": "description"}):
+                    metadata["description"] = description.get(
+                        "content", "No description found."
+                    )
+                if html := soup.find("html"):
+                    metadata["language"] = html.get("lang", "No language found.")
+
+                log.debug(f"Loaded {path} with {title} {len(text)} characters")
+                docs.append(Document(page_content=text, metadata=metadata))
+        except Exception as e:
+            # Log the error and continue with the next URL
+            log.error(f"Error loading {self.web_paths}: {e}")
+
+        return docs
 
 
 def get_web_loader(

@@ -927,7 +927,7 @@ async def process_chat_response(
 
             if tasks and messages:
                 if TASKS.TITLE_GENERATION in tasks:
-                    if tasks[TASKS.TITLE_GENERATION]:
+                    if tasks[TASKS.TITLE_GENERATION] and False:
                         res = await generate_title(
                             request,
                             {
@@ -982,7 +982,7 @@ async def process_chat_response(
                             }
                         )
 
-                if TASKS.TAGS_GENERATION in tasks and tasks[TASKS.TAGS_GENERATION]:
+                if TASKS.TAGS_GENERATION in tasks and tasks[TASKS.TAGS_GENERATION] and False:
                     res = await generate_chat_tags(
                         request,
                         {

@@ -110,44 +110,44 @@ DEFAULT_CONFIG = {
         "prompt_suggestions": [
             {
                 "title": [
-                    "Help me study",
-                    "vocabulary for a college entrance exam",
+                    "学习英语",
+                    "大学四级英语的词汇量",
                 ],
                 "content": "Help me study vocabulary: write a sentence for me to fill in the blank, and I'll try to pick the correct option.",
             },
             {
                 "title": [
-                    "Give me ideas",
-                    "for what to do with my kids' art",
+                    "出个主意",
+                    "如何处理小孩的艺术作品",
                 ],
                 "content": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter.",
             },
             {
-                "title": ["Tell me a fun fact", "about the Roman Empire"],
-                "content": "Tell me a random fun fact about the Roman Empire",
+                "title": ["讲个趣事", "关于中国古代文化"],
+                "content": "Tell me a random fun fact about the Chinese culture.",
             },
             {
                 "title": [
-                    "Show me a code snippet",
-                    "of a website's sticky header",
+                    "写行代码",
+                    "固定header的页面代码",
                 ],
                 "content": "Show me a code snippet of a website's sticky header in CSS and JavaScript.",
             },
             {
                 "title": [
-                    "Explain options trading",
-                    "if I'm familiar with buying and selling stocks",
+                    "期权交易",
+                    "针对比较熟悉股票买卖的人",
                 ],
                 "content": "Explain options trading in simple terms if I'm familiar with buying and selling stocks.",
             },
             {
-                "title": ["Overcome procrastination", "give me tips"],
+                "title": ["克服拖延", "给我解决拖延的建议"],
                 "content": "Could you start by asking me about instances when I procrastinate the most and then give me some suggestions to overcome it?",
             },
             {
                 "title": [
-                    "Grammar check",
-                    "rewrite it for better readability ",
+                    "句子重写",
+                    "为了更好的可读性",
                 ],
                 "content": 'Check the following sentence for grammar and clarity: "[sentence]". Rewrite it for better readability while maintaining its original meaning.',
             },
@@ -840,31 +840,47 @@ DEFAULT_PROMPT_SUGGESTIONS = PersistentConfig(
     "ui.prompt_suggestions",
     [
         {
-            "title": ["Help me study", "vocabulary for a college entrance exam"],
+            "title": [
+                "学习英语",
+                "大学四级英语的词汇量",
+            ],
             "content": "Help me study vocabulary: write a sentence for me to fill in the blank, and I'll try to pick the correct option.",
         },
         {
-            "title": ["Give me ideas", "for what to do with my kids' art"],
+            "title": [
+                "出个主意",
+                "如何处理小孩的艺术作品",
+            ],
             "content": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter.",
         },
         {
-            "title": ["Tell me a fun fact", "about the Roman Empire"],
-            "content": "Tell me a random fun fact about the Roman Empire",
+            "title": ["讲个趣事", "关于中国古代文化"],
+            "content": "Tell me a random fun fact about the Chinese culture.",
         },
         {
-            "title": ["Show me a code snippet", "of a website's sticky header"],
+            "title": [
+                "写行代码",
+                "固定header的页面代码",
+            ],
             "content": "Show me a code snippet of a website's sticky header in CSS and JavaScript.",
         },
         {
             "title": [
-                "Explain options trading",
-                "if I'm familiar with buying and selling stocks",
+                "期权交易",
+                "针对比较熟悉股票买卖的人",
             ],
             "content": "Explain options trading in simple terms if I'm familiar with buying and selling stocks.",
         },
         {
-            "title": ["Overcome procrastination", "give me tips"],
+            "title": ["克服拖延", "给我解决拖延的建议"],
             "content": "Could you start by asking me about instances when I procrastinate the most and then give me some suggestions to overcome it?",
+        },
+        {
+            "title": [
+                "句子重写",
+                "为了更好的可读性",
+            ],
+            "content": 'Check the following sentence for grammar and clarity: "[sentence]". Rewrite it for better readability while maintaining its original meaning.',
         },
     ],
 )
@@ -1105,6 +1121,7 @@ TITLE_GENERATION_PROMPT_TEMPLATE = PersistentConfig(
 
 DEFAULT_TITLE_GENERATION_PROMPT_TEMPLATE = """### Task:
 Generate a concise, 3-5 word title with an emoji summarizing the chat history.
+language must be the same as the chat history
 ### Guidelines:
 - The title should clearly represent the main theme or subject of the conversation.
 - Use emojis that enhance understanding of the topic, but avoid quotation marks or special formatting.
@@ -1132,7 +1149,7 @@ TAGS_GENERATION_PROMPT_TEMPLATE = PersistentConfig(
 
 DEFAULT_TAGS_GENERATION_PROMPT_TEMPLATE = """### Task:
 Generate 1-3 broad tags categorizing the main themes of the chat history, along with 1-3 more specific subtopic tags.
-
+language must be the same as the chat history
 ### Guidelines:
 - Start with high-level domains (e.g. Science, Technology, Philosophy, Arts, Politics, Business, Health, Sports, Entertainment, Education)
 - Consider including relevant subfields/subdomains if they are strongly represented throughout the conversation

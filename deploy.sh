@@ -4,6 +4,6 @@ if [ $# -ne 1 ]; then
     exit 1
 fi
 
-rsync -av --exclude='backend/data' backend build webui:/mnt/xxx/webui/version/$1
+rsync -av --exclude='backend/data' backend build webui:/mnt/yyy/webui/version/$1
 
-ssh webui "ln -snf /mnt/xxx/webui/version/$1 /mnt/xxx/webui/current"
+ssh webui "ln -snf /mnt/yyy/webui/version/$1 /mnt/xxx/webui/current"

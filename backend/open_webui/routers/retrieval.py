@@ -1277,7 +1277,7 @@ def process_web_search(
             detail=ERROR_MESSAGES.WEB_SEARCH_ERROR(e),
         )
 
-    log.debug(f"web_results: {web_results}")
+    log.debug(f"web_results: {len(web_results)}")
 
     try:
         collection_name = form_data.collection_name
@@ -1292,7 +1292,8 @@ def process_web_search(
             verify_ssl=request.app.state.config.ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION,
             requests_per_second=request.app.state.config.RAG_WEB_SEARCH_CONCURRENT_REQUESTS,
         )
-        docs = loader.load()
+        docs = loader.aload()
+        log.debug(f"get docs {len(docs)}")
         save_docs_to_vector_db(
             request, docs, collection_name, overwrite=True, user=user
         )
