@@ -99,6 +99,7 @@ class SafeWebBaseLoader(WebBaseLoader):
             self, url: str, retries: int = 1, cooldown: int = 2, backoff: float = 1.5
     ) -> str:
         async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=8)) as session:
+            log.debug(f"Fetching {url}")
             for i in range(retries):
                 try:
                     kwargs: Dict = dict(

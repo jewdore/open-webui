@@ -841,46 +841,55 @@ DEFAULT_PROMPT_SUGGESTIONS = PersistentConfig(
     [
         {
             "title": [
-                "学习英语",
-                "大学四级英语的词汇量",
+                "逻辑分析",
+                "复杂问题的推理",
             ],
-            "content": "Help me study vocabulary: write a sentence for me to fill in the blank, and I'll try to pick the correct option.",
+            "content": "我需要你帮我分析一个复杂问题。请一步步地分解这个问题,对每个组成部分进行系统性分析,并提供详细的解决方案。请确保你的解决方案是全面的,并提供必要的细节,以便我能够理解和实施。",
         },
         {
             "title": [
-                "出个主意",
-                "如何处理小孩的艺术作品",
+                "代码优化",
+                "性能和可读性改进",
             ],
-            "content": "What are 5 creative things I could do with my kids' art? I don't want to throw them away, but it's also so much clutter.",
+            "content": "请审查下面这段代码, 并从性能和可读性两个方面提供优化建议。在保持原有功能的前提下,说明如何让代码更高效、更易于维护。",
         },
         {
-            "title": ["讲个趣事", "关于中国古代文化"],
-            "content": "Tell me a random fun fact about the Chinese culture.",
+            "title": ["概念解释", "专业知识普及"],
+            "content": "请用通俗易懂的语言解释[专业概念]。尽可能使用生活中的类比和具体例子,让完全不了解这个领域的人也能理解。",
         },
         {
             "title": [
-                "写行代码",
-                "固定header的页面代码",
+                "数据分析",
+                "数据模式识别",
             ],
-            "content": "Show me a code snippet of a website's sticky header in CSS and JavaScript.",
+            "content": "这里有一组数据,请帮我分析其中的关键模式和趋势。我需要了解这些数据反映出的重要见解,以及可能存在的相关性。",
         },
         {
             "title": [
-                "期权交易",
-                "针对比较熟悉股票买卖的人",
+                "算法设计",
+                "解决方案构建",
             ],
-            "content": "Explain options trading in simple terms if I'm familiar with buying and selling stocks.",
+            "content": "请帮我设计一个解决[具体问题]的高效算法。需要考虑时间复杂度和空间复杂度,并解释算法的工作原理。",
         },
         {
-            "title": ["克服拖延", "给我解决拖延的建议"],
-            "content": "Could you start by asking me about instances when I procrastinate the most and then give me some suggestions to overcome it?",
+            "title": ["调试辅助", "错误诊断"],
+            "content": "我的代码出现了这个错误,请帮我诊断问题所在,并提供可能的解决方案。如果有多种修复方法,请一并列出各自的优缺点。",
         },
         {
             "title": [
-                "句子重写",
-                "为了更好的可读性",
+                "设计方案",
+                "产品与用户体验",
             ],
-            "content": 'Check the following sentence for grammar and clarity: "[sentence]". Rewrite it for better readability while maintaining its original meaning.',
+            "content": """我需要一个[具体场景]的设计方案。请从以下几个方面进行分析：
+
+1. 用户需求分析：目标用户是谁？他们的核心痛点是什么？
+2. 功能规划：需要包含哪些关键功能？
+3. 交互设计：用户的操作流程是怎样的？
+4. 视觉建议：有什么视觉设计要点和建议？
+5. 技术考虑：实现这个方案需要用到什么技术？
+6. 可行性评估：方案的优缺点是什么？有什么潜在风险？
+
+请针对每个方面给出详细的分析和建议。如果有类似的成功案例，也请一并参考。""",
         },
     ],
 )

@@ -365,6 +365,21 @@
 					chatInputContainerElement.focus();
 				}
 
+				const chatInputElement = document.getElementById('chat-input');
+
+				if (chatInputElement && chatInputElement instanceof HTMLTextAreaElement) {
+					chatInputElement.style.height = '';
+					chatInputElement.style.height = Math.min(chatInputElement.scrollHeight, 200) + 'px';
+					chatInputElement.focus();
+
+					const words = findWordIndices(prompt);
+
+					if (words.length > 0) {
+						const word = words.at(0);
+						word && chatInputElement.setSelectionRange(word?.startIndex + 1, word.endIndex);
+					}
+				}
+
 				await tick();
 			}}
 		/>
